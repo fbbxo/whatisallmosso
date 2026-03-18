@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Admin — Allmosso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #2d9e5f;
+      --green-light: #3dba72;
+      --green-dark: #1e7a47;
+      --yellow: #ffd347;
+      --orange: #ff7043;
+      --cream: #fffdf5;
+      --text: #1a2e1a;
+      --card-bg: #ffffff;
+      --red: #e53935;
+      --shadow: 0 8px 32px rgba(45,158,95,0.13);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100dvh;
+    }
+
+    /* ── BLOBS ── */
+    .blob-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.15; }
+    .blob-1 { width: 300px; height: 300px; background: var(--green); top: -80px; left: -80px; }
+    .blob-2 { width: 240px; height: 240px; background: var(--yellow); top: 50%; right: -60px; }
+
+    /* ── LAYOUT ── */
+    .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 0 20px 60px; }
+
+    /* ── HEADER ── */
+    .admin-header {
+      background: var(--green-dark);
+      padding: 40px 24px 24px;
+      text-align: center;
+      border-radius: 0 0 28px 28px;
+      box-shadow: 0 6px 24px rgba(30,122,71,0.3);
+      margin: 0 -20px 28px;
+    }
+    .admin-header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem;
+      color: white;
+    }
+    .admin-header p {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .admin-badge {
+      display: inline-block;
+      background: var(--yellow);
+      color: var(--text);
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.85rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-top: 10px;
+    }
+
+    /* ── LOGIN CARD ── */
+    #login-screen {
+      background: white;
+      border-radius: 24px;
+      padding: 32px 28px;
+      box-shadow: var(--shadow);
+    }
+    #login-screen h2 {
+      font-family: 'Fredoka One', cursive;
+      color: var(--green-dark);
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+    #login-screen p {
+      font-size: 0.85rem;
+      color: #888;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%;
+      border: 2.5px solid #e0f0e8;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      background: #fafffe;
+      transition: border-color 0.2s;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    .field-input:focus { border-color: var(--green); }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 15px 24px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.15rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(45,158,95,0.35);
+      transition: all 0.2s;
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.6; cursor: default; }
+
+    .error-msg {
+      background: #fff0f0;
+      border: 2px solid #ffcdd2;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--red);
+      margin-top: 14px;
+      display: none;
+    }
+
+    /* ── ADMIN PANEL ── */
+    #admin-panel { display: none; }
+
+    .week-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #888;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    /* ── DIA CARD ── */
+    .dia-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .dia-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      cursor: pointer;
+      user-select: none;
+    }
+    .dia-card-header h3 {
+      font-family: 'Fredoka One', cursive;
+      color: white;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dia-card-header .date-inp {
+      background: rgba(255,255,255,0.25);
+      border: none;
+      border-radius: 10px;
+      padding: 4px 10px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.95rem;
+      color: white;
+      width: 80px;
+      text-align: center;
+      outline: none;
+    }
+    .dia-card-header .date-inp::placeholder { color: rgba(255,255,255,0.6); }
+
+    .feriado-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: #fff8e7;
+      border-bottom: 1px solid #fff0cc;
+    }
+    .feriado-toggle label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #b8860b;
+      cursor: pointer;
+    }
+    .toggle-check {
+      width: 18px; height: 18px;
+      accent-color: var(--orange);
+      cursor: pointer;
+    }
+
+    .dia-fields { padding: 14px 18px 18px; }
+    .dia-field { margin-bottom: 14px; }
+
+    /* ── FERIADO OVERLAY ── */
+    .feriado-overlay {
+      padding: 18px;
+      background: #fff8e7;
+      text-align: center;
+      display: none;
+    }
+    .feriado-overlay p {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #b8860b;
+    }
+    .feriado-nome-inp {
+      width: 100%;
+      border: 2px solid #ffe082;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      background: white;
+      outline: none;
+      margin-top: 10px;
+    }
+
+    /* ── SAVE BUTTON ── */
+    .save-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 14px 20px 30px;
+      background: linear-gradient(to top, var(--cream) 65%, transparent);
+      z-index: 10;
+    }
+    .btn-save {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, var(--green-dark), var(--green));
+      color: white;
+      border: none;
+      border-radius: 18px;
+      padding: 17px 24px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(30,122,71,0.4);
+      transition: all 0.2s;
+    }
+    .btn-save:active { transform: scale(0.98); }
+    .btn-save:disabled { opacity: 0.6; cursor: default; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: var(--green-dark);
+      color: white;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      padding: 12px 24px;
+      border-radius: 20px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+      transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--red); }
+
+    /* ── LOGOUT ── */
+    .logout-btn {
+      display: block;
+      text-align: center;
+      margin: 8px auto 0;
+      background: none;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 8px 20px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #999;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .hidden { display: none !important; }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div class="blob-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <div class="app">
+    <div class="admin-header">
+      <h1>🛠️ Allmosso Admin</h1>
+      <p>Painel de edição do cardápio</p>
+      <span class="admin-badge">RU IFTO Palmas</span>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="login-screen">
+      <h2>🔐 Entrar</h2>
+      <p>Acesso restrito ao administrador</p>
+      <label class="field-label" for="inp-email">E-mail</label>
+      <input class="field-input" type="email" id="inp-email" placeholder="seu@email.com" autocomplete="username">
+      <label class="field-label" for="inp-senha">Senha</label>
+      <input class="field-input" type="password" id="inp-senha" placeholder="••••••••" autocomplete="current-password">
+      <button class="btn-primary" id="btn-login" onclick="fazerLogin()">Entrar</button>
+      <div class="error-msg" id="login-erro">E-mail ou senha incorretos.</div>
+    </div>
+
+    <!-- PAINEL ADMIN -->
+    <div id="admin-panel">
+      <p class="week-label" id="semana-label">Carregando semana...</p>
+      <div id="dias-container"></div>
+      <button class="logout-btn" onclick="fazerLogout()">Sair da conta</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">✅ Cardápio salvo!</div>
+
+  <!-- BARRA DE SALVAR -->
+  <div class="save-bar hidden" id="save-bar">
+    <button class="btn-save" id="btn-salvar" onclick="salvarCardapio()">
+      💾 Salvar cardápio
+    </button>
+  </div>
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // ─── CONFIG ───────────────────────────────────────────
+    const FIREBASE_CONFIG = {
+      apiKey:            "AIzaSyBkqNcDzUWoJ_DvVnprecKs8fb7p7Nlv7w",
+      authDomain:        "allmosso.firebaseapp.com",
+      databaseURL:       "https://allmosso-default-rtdb.firebaseio.com",
+      projectId:         "allmosso",
+      storageBucket:     "allmosso.firebasestorage.app",
+      messagingSenderId: "220562668021",
+      appId:             "1:220562668021:web:e3fb9dbabd3b15091948bc",
+    };
+
+    // ─── ESTRUTURA DOS CAMPOS ─────────────────────────────
+    const CAMPOS = [
+      { key: 'proteico',       label: 'Prato Proteico',  icon: '🍗', placeholder: 'Ex: Frango ao molho'        },
+      { key: 'guarnicao',      label: 'Guarnição',        icon: '🍝', placeholder: 'Ex: Macarrão à bolonhesa'   },
+      { key: 'salada',         label: 'Salada',           icon: '🥗', placeholder: 'Ex: Alface e beterraba'     },
+      { key: 'acompanhamento', label: 'Acompanhamento',   icon: '🍚', placeholder: 'Arroz e feijão'             },
+      { key: 'vegetariano',    label: 'Vegetariano',      icon: '🌱', placeholder: 'Ex: Almôndegas de PTS'      },
+    ];
+
+    const DIAS_NOMES = ['', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+    const DIAS_EMOJI_DEFAULT = ['', '🍗', '🥩', '🍗', '🥩', '🍗'];
+
+    // ─── FIREBASE INIT ────────────────────────────────────
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const auth = firebase.auth();
+    const db   = firebase.database();
+
+    // ─── SEMANA ───────────────────────────────────────────
+    function getWeekKey() {
+      const now = new Date();
+      const d   = new Date(now);
+      d.setHours(0,0,0,0);
+      d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+      const week1 = new Date(d.getFullYear(), 0, 4);
+      const wn    = 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+      return `${d.getFullYear()}-W${String(wn).padStart(2,'0')}`;
+    }
+
+    // Pega as datas de Segunda a Sexta da semana atual
+    function getDatasSemanais() {
+      const now = new Date();
+      const dow = now.getDay();
+      // Segunda desta semana
+      const seg = new Date(now);
+      seg.setHours(0,0,0,0);
+      seg.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
+
+      const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+      return [1,2,3,4,5].map(i => {
+        const d = new Date(seg);
+        d.setDate(seg.getDate() + (i - 1));
+        return fmt(d);
+      });
+    }
+
+    const WEEK_KEY = getWeekKey();
+    const datas    = getDatasSemanais();
+
+    // ─── LOGIN ────────────────────────────────────────────
+    auth.onAuthStateChanged(user => {
+      if (user) mostrarPainel();
+      else       mostrarLogin();
+    });
+
+    function mostrarLogin() {
+      document.getElementById('login-screen').style.display = 'block';
+      document.getElementById('admin-panel').style.display  = 'none';
+      document.getElementById('save-bar').classList.add('hidden');
+    }
+
+    function mostrarPainel() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-panel').style.display  = 'block';
+      document.getElementById('save-bar').classList.remove('hidden');
+      document.getElementById('semana-label').textContent   = `Semana ${WEEK_KEY} · ${datas[0]} a ${datas[4]}`;
+      carregarCardapio();
+    }
+
+    async function fazerLogin() {
+      const email = document.getElementById('inp-email').value.trim();
+      const senha = document.getElementById('inp-senha').value;
+      const btn   = document.getElementById('btn-login');
+      const erro  = document.getElementById('login-erro');
+
+      if (!email || !senha) { mostrarErro('Preencha e-mail e senha.'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      erro.style.display = 'none';
+
+      try {
+        await auth.signInWithEmailAndPassword(email, senha);
+      } catch(e) {
+        mostrarErro('E-mail ou senha incorretos.');
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    }
+
+    function fazerLogout() {
+      auth.signOut();
+    }
+
+    function mostrarErro(msg) {
+      const el = document.getElementById('login-erro');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    // ─── CONSTRUIR FORMULÁRIO ─────────────────────────────
+    let cardapioAtual = {};
+
+    function buildForm(dadosSalvos) {
+      const container = document.getElementById('dias-container');
+      container.innerHTML = '';
+
+      [1,2,3,4,5].forEach(dia => {
+        const dados    = dadosSalvos[dia] || {};
+        const isFer    = dados.feriado === true;
+        const dataVal  = dados.data || datas[dia-1];
+
+        const card = document.createElement('div');
+        card.className = 'dia-card';
+        card.id = `card-dia-${dia}`;
+
+        // Header com nome do dia e campo de data
+        const header = document.createElement('div');
+        header.className = 'dia-card-header';
+        header.innerHTML = `
+          <h3>${DIAS_NOMES[dia]}</h3>
+          <input class="date-inp" type="text" id="data-${dia}" 
+            value="${dataVal}" placeholder="DD/MM" maxlength="5">
+        `;
+
+        // Toggle feriado
+        const ferToggle = document.createElement('div');
+        ferToggle.className = 'feriado-toggle';
+        ferToggle.innerHTML = `
+          <input class="toggle-check" type="checkbox" id="fer-${dia}" 
+            ${isFer ? 'checked' : ''} onchange="toggleFeriado(${dia})">
+          <label for="fer-${dia}">🎉 Feriado / RU fechado</label>
+        `;
+
+        // Feriado overlay
+        const ferOverlay = document.createElement('div');
+        ferOverlay.className = 'feriado-overlay';
+        ferOverlay.id = `fer-overlay-${dia}`;
+        ferOverlay.style.display = isFer ? 'block' : 'none';
+        ferOverlay.innerHTML = `
+          <p>O RU não funciona neste dia.</p>
+          <input class="feriado-nome-inp" type="text" id="fername-${dia}"
+            value="${dados.feriadoNome || ''}" placeholder="Nome do feriado (opcional)">
+        `;
+
+        // Campos do cardápio
+        const fields = document.createElement('div');
+        fields.className = 'dia-fields';
+        fields.id = `fields-${dia}`;
+        fields.style.display = isFer ? 'none' : 'block';
+
+        CAMPOS.forEach(c => {
+          const val = (dados.items || {})[c.key] || '';
+          fields.innerHTML += `
+            <div class="dia-field">
+              <label class="field-label" for="${c.key}-${dia}">${c.icon} ${c.label}</label>
+              <input class="field-input" type="text" id="${c.key}-${dia}"
+                value="${val}" placeholder="${c.placeholder}">
+            </div>
+          `;
+        });
+
+        card.appendChild(header);
+        card.appendChild(ferToggle);
+        card.appendChild(ferOverlay);
+        card.appendChild(fields);
+        container.appendChild(card);
+      });
+    }
+
+    function toggleFeriado(dia) {
+      const isFer = document.getElementById(`fer-${dia}`).checked;
+      document.getElementById(`fer-overlay-${dia}`).style.display = isFer ? 'block' : 'none';
+      document.getElementById(`fields-${dia}`).style.display       = isFer ? 'none' : 'block';
+    }
+
+    // ─── CARREGAR DO FIREBASE ─────────────────────────────
+    function carregarCardapio() {
+      db.ref(`cardapio/${WEEK_KEY}`).once('value').then(snap => {
+        cardapioAtual = snap.val() || {};
+        buildForm(cardapioAtual);
+      });
+    }
+
+    // ─── SALVAR NO FIREBASE ───────────────────────────────
+    async function salvarCardapio() {
+      const btn = document.getElementById('btn-salvar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Salvando...';
+
+      const payload = {};
+
+      [1,2,3,4,5].forEach(dia => {
+        const isFer   = document.getElementById(`fer-${dia}`).checked;
+        const data    = document.getElementById(`data-${dia}`).value.trim();
+
+        if (isFer) {
+          payload[dia] = {
+            feriado:     true,
+            feriadoNome: document.getElementById(`fername-${dia}`).value.trim(),
+            data,
+          };
+        } else {
+          const items = {};
+          CAMPOS.forEach(c => {
+            items[c.key] = document.getElementById(`${c.key}-${dia}`).value.trim();
+          });
+          payload[dia] = { data, items, feriado: false };
+        }
+      });
+
+      try {
+        await db.ref(`cardapio/${WEEK_KEY}`).set(payload);
+        mostrarToast('✅ Cardápio salvo com sucesso!', false);
+      } catch(e) {
+        mostrarToast('❌ Erro ao salvar. Tente novamente.', true);
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '💾 Salvar cardápio';
+    }
+
+    // ─── TOAST ────────────────────────────────────────────
+    function mostrarToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className   = 'toast' + (isError ? ' error' : '');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // Enter no login
+    document.getElementById('inp-senha').addEventListener('keydown', e => {
+      if (e.key === 'Enter') fazerLogin();
+    });
+    document.getElementById('inp-email').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('inp-senha').focus();
+    });
+  </script>
+</body>
+</html>

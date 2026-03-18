@@ -1,79 +1,37 @@
-/* ═══════════════════════════════════════
-   ALLMOSSO — RU IFTO Palmas
-   app.js
-   ═══════════════════════════════════════ */
+// ═══════════════════════════════════════
+//   ALLMOSSO — RU IFTO Palmas
+//   app.js  (v2 — cardápio via Firebase)
+// ═══════════════════════════════════════
 
 // ─────────────────────────────────────────
 // FIREBASE CONFIG
-// ✏️  Cole aqui suas credenciais do Firebase
-// console.firebase.google.com → Seu projeto → Config
 // ─────────────────────────────────────────
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyBkqNcDzUWoJ_DvVnprecKs8fb7p7Nlv7w",
-  authDomain:        "allmosso.firebaseapp.com",
-  databaseURL:       "https://allmosso-default-rtdb.firebaseio.com",
-  projectId:         "allmosso",
-  storageBucket:     "allmosso.firebasestorage.app",
-  messagingSenderId: "220562668021",
-  appId:             "1:220562668021:web:e3fb9dbabd3b15091948bc",
+  apiKey: "AIzaSyBsxvV05vcr6abE822Y-pYljmbYWUucfnQ",
+    authDomain: "allmosso-testes.firebaseapp.com",
+    databaseURL: "https://allmosso-testes-default-rtdb.firebaseio.com",
+    projectId: "allmosso-testes",
+    storageBucket: "allmosso-testes.firebasestorage.app",
+    messagingSenderId: "408789882571",
+    appId: "1:408789882571:web:88c5965e5c13d67267ad4e",
+    measurementId: "G-WR2LLL4MBR"
 };
 
 // ─────────────────────────────────────────
-// DADOS DO CARDÁPIO
-// ✏️  Atualize aqui toda semana!
-// 1 = Segunda | 2 = Terça | 3 = Quarta | 4 = Quinta | 5 = Sexta
+// MAPEAMENTO DOS CAMPOS (admin → exibição)
 // ─────────────────────────────────────────
-const CARDAPIO = {
-  0: null,
-  1: {
-    data: '16/03', emoji: '🍗',
-    items: [
-      { label: 'Prato Proteico', icon: '🍗', name: 'Frango ao molho' },
-      { label: 'Guarnição',      icon: '🍝', name: 'Macarrão à bolonhesa' },
-      { label: 'Salada',         icon: '🥗', name: 'Alface, beterraba e repolho' },
-      { label: 'Acompanhamento', icon: '🍚', name: 'Arroz e feijão' },
-      { label: 'Vegetariano',    icon: '🌱', name: 'Almôndegas de PTS' },
-    ]
-  },
-  2: {
-    data: '17/03', emoji: '🥩',
-    items: [
-      { label: 'Prato Proteico', icon: '🥩', name: 'Tiras de carne ao molho barbecue' },
-      { label: 'Guarnição',      icon: '🥔', name: 'Batata rústica' },
-      { label: 'Salada',         icon: '🥗', name: 'Salada mista' },
-      { label: 'Acompanhamento', icon: '🍚', name: 'Arroz e feijão' },
-      { label: 'Vegetariano',    icon: '🥒', name: 'Abobrinha recheada' },
-    ]
-  },
-  3: {
-    data: '18/03', emoji: '🍗',
-    items: [
-      { label: 'Prato Proteico', icon: '🍗', name: 'Bife de frango' },
-      { label: 'Guarnição',      icon: '🟣', name: 'Beterraba' },
-      { label: 'Salada',         icon: '🥗', name: 'Acelga e cenoura' },
-      { label: 'Acompanhamento', icon: '🍚', name: 'Arroz e feijão' },
-      { label: 'Vegetariano',    icon: '🌱', name: 'PTS à jardineira' },
-    ]
-  },
-  4: null, // Quinta — Feriado
-  5: {
-    data: '20/03', emoji: '🥩',
-    items: [
-      { label: 'Prato Proteico', icon: '🥩', name: 'Lagarto ao molho' },
-      { label: 'Guarnição',      icon: '🍝', name: 'Macarrão alho e óleo' },
-      { label: 'Salada',         icon: '🥗', name: 'Repolho e tomate' },
-      { label: 'Acompanhamento', icon: '🍚', name: 'Arroz e feijão' },
-      { label: 'Vegetariano',    icon: '🌱', name: 'Almôndegas de PTS' },
-    ]
-  },
-  6: null,
-};
+const CAMPOS_MAP = [
+  { key: 'proteico',       label: 'Prato Proteico',  icon: '🍗' },
+  { key: 'guarnicao',      label: 'Guarnição',        icon: '🍝' },
+  { key: 'salada',         label: 'Salada',           icon: '🥗' },
+  { key: 'acompanhamento', label: 'Acompanhamento',   icon: '🍚' },
+  { key: 'vegetariano',    label: 'Vegetariano',      icon: '🌱' },
+];
 
 // ─────────────────────────────────────────
-// FERIADOS
-// ✏️  Formato 'DD/MM': 'Nome do feriado'
+// FERIADOS FIXOS (para exibição de datas)
 // ─────────────────────────────────────────
-const FERIADOS = {
+const FERIADOS_FIXOS = {
   '01/01': 'Confraternização Universal 🎆',
   '16/02': 'Carnaval (ponto facultativo) 🎭',
   '17/02': 'Carnaval (ponto facultativo) 🎭',
@@ -120,19 +78,17 @@ function toKey(date) {
   return `${d}/${m}`;
 }
 
-// Chave única da semana (ex: "2026-W12") para isolar votos por semana
 function getWeekKey() {
   const d = new Date(now);
   d.setHours(0,0,0,0);
   d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
   const week1 = new Date(d.getFullYear(), 0, 4);
   const wn = 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-  return `${d.getFullYear()}-W${wn}`;
+  return `${d.getFullYear()}-W${String(wn).padStart(2,'0')}`;
 }
 
 const todayKey    = toKey(now);
-const isFeriado   = todayKey in FERIADOS;
-const feriadoNome = FERIADOS[todayKey] || '';
+const isFeriadoFixo = todayKey in FERIADOS_FIXOS;
 const WEEK_KEY    = getWeekKey();
 
 // ─────────────────────────────────────────
@@ -141,38 +97,74 @@ const WEEK_KEY    = getWeekKey();
 document.getElementById('header-date').textContent =
   `${DIAS[today]}, ${now.getDate()} de ${MESES[now.getMonth()]}`;
 
-// Injeta link do WhatsApp
 const waLink = document.getElementById('wa-link');
 if (waLink) waLink.href = WA_LINK;
+
+// ─────────────────────────────────────────
+// CARDÁPIO — dados do Firebase (preenchido ao carregar)
+// ─────────────────────────────────────────
+let CARDAPIO_FB = {}; // { 1: { data, items, feriado }, ... }
+
+// Converte dados do Firebase para o formato de exibição
+function fbDayToCard(dayData) {
+  if (!dayData || dayData.feriado) return null;
+  const items = dayData.items || {};
+  return {
+    data: dayData.data || '',
+    emoji: detectEmoji(items.proteico || ''),
+    items: CAMPOS_MAP.map(c => ({
+      label: c.label,
+      icon:  c.icon,
+      name:  items[c.key] || '—',
+    })),
+  };
+}
+
+function detectEmoji(prato) {
+  if (!prato) return '🍽️';
+  const p = prato.toLowerCase();
+  if (p.includes('frango') || p.includes('galinha') || p.includes('peito')) return '🍗';
+  if (p.includes('peixe') || p.includes('tilápia') || p.includes('atum'))   return '🐟';
+  if (p.includes('carne') || p.includes('bife') || p.includes('alcatra') || p.includes('lagarto')) return '🥩';
+  if (p.includes('ovo') || p.includes('ovos')) return '🍳';
+  if (p.includes('porco') || p.includes('lombo') || p.includes('costela')) return '🥓';
+  return '🍽️';
+}
 
 // ─────────────────────────────────────────
 // RENDERIZA CARD DE UM DIA
 // ─────────────────────────────────────────
 function renderCard(dayIndex, checkFeriado = false) {
-  if (checkFeriado && isFeriado) {
-    return `<div class="weekend-msg">
-      <span class="emoji">🎉</span>
-      <h2>Feriado!</h2>
-      <p><strong>${feriadoNome}</strong><br>O RU não funciona hoje.<br>Bom feriado! 🥳</p>
-    </div>`;
+  const todayData = CARDAPIO_FB[dayIndex];
+
+  // Verifica feriado marcado no admin OU feriado fixo (apenas para "hoje")
+  if (checkFeriado) {
+    if (todayData && todayData.feriado) {
+      const nome = todayData.feriadoNome || FERIADOS_FIXOS[todayKey] || 'Feriado';
+      return msgFeriado(nome);
+    }
+    if (isFeriadoFixo && !todayData) {
+      return msgFeriado(FERIADOS_FIXOS[todayKey]);
+    }
   }
 
-  const d = CARDAPIO[dayIndex];
+  const d = fbDayToCard(todayData);
 
   if (!d) {
-    const isWeekend = dayIndex === 0 || dayIndex === 6;
-    if (isWeekend) {
+    if (dayIndex === 0 || dayIndex === 6) {
       return `<div class="weekend-msg">
         <span class="emoji">😴</span>
         <h2>Sem almoço hoje!</h2>
         <p>O RU não funciona aos finais de semana.<br>Aproveite o descanso! 🌴</p>
       </div>`;
     } else {
-      const nomeF = FERIADOS[toKey(now)] || 'Feriado';
+      // Dia de semana mas sem dados: pode ser feriado ou cardápio não cadastrado
+      const nome = (todayData && todayData.feriadoNome) || FERIADOS_FIXOS[todayKey];
+      if (nome) return msgFeriado(nome);
       return `<div class="weekend-msg">
-        <span class="emoji">🎉</span>
-        <h2>Feriado!</h2>
-        <p><strong>${nomeF}</strong><br>O RU não funciona hoje.<br>Bom feriado! 🥳</p>
+        <span class="emoji">📋</span>
+        <h2>Cardápio não disponível</h2>
+        <p>O cardápio desta semana ainda não foi cadastrado.<br>Verifique mais tarde! 🕐</p>
       </div>`;
     }
   }
@@ -202,7 +194,13 @@ function renderCard(dayIndex, checkFeriado = false) {
     </div>`;
 }
 
-document.getElementById('sec-hoje').innerHTML = renderCard(today, true);
+function msgFeriado(nome) {
+  return `<div class="weekend-msg">
+    <span class="emoji">🎉</span>
+    <h2>Feriado!</h2>
+    <p><strong>${nome}</strong><br>O RU não funciona hoje.<br>Bom feriado! 🥳</p>
+  </div>`;
+}
 
 // ─────────────────────────────────────────
 // ABA SEMANA
@@ -227,9 +225,6 @@ function buildWeekCard() {
   document.getElementById('week-card-content').innerHTML = renderCard(selectedDay);
 }
 
-buildWeekNav();
-buildWeekCard();
-
 // ─────────────────────────────────────────
 // TROCA DE ABAS
 // ─────────────────────────────────────────
@@ -244,43 +239,54 @@ function showTab(tab) {
 // ─────────────────────────────────────────
 // VOTAÇÃO — FIREBASE REALTIME DATABASE
 // ─────────────────────────────────────────
-const VOTE_DIAS = [
-  { key: 1, label: 'Segunda', data: '' },
-  { key: 2, label: 'Terça',   data: '' },
-  { key: 3, label: 'Quarta',  data: '' },
-  { key: 4, label: 'Quinta',  data: '' },
-  { key: 5, label: 'Sexta',   data: '' },
-];
-
-// Preenche datas dos dias
-VOTE_DIAS.forEach(v => {
-  const d = CARDAPIO[v.key];
-  v.data = d ? d.data : null;
-  v.emoji = d ? d.emoji : '🎉';
-  v.prato = d ? d.items.find(i => i.label === 'Prato Proteico')?.name : 'Feriado';
-});
-
 const VOTED_KEY = `allmosso_voted_${WEEK_KEY}`;
 let userVote    = localStorage.getItem(VOTED_KEY);
 let db          = null;
 let votesData   = { 1:0, 2:0, 3:0, 4:0, 5:0 };
 
-// Inicializa Firebase
+function getVoteDias() {
+  return [1,2,3,4,5].map(k => {
+    const d    = CARDAPIO_FB[k];
+    const card = fbDayToCard(d);
+    return {
+      key:    k,
+      label:  DIAS[k],
+      data:   d ? d.data : null,
+      emoji:  card ? card.emoji : '🎉',
+      prato:  card ? (card.items.find(i => i.label === 'Prato Proteico')?.name || '—') : 'Feriado',
+      isFer:  (!d) || d.feriado,
+    };
+  });
+}
+
 function initFirebase() {
   try {
-    if (FIREBASE_CONFIG.apiKey === 'COLE_AQUI') {
-      renderVotacao(false); // mostra sem Firebase (modo demo)
-      return;
-    }
     firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.database();
-    const ref = db.ref(`votos/${WEEK_KEY}`);
-    ref.on('value', snap => {
+
+    // Carrega cardápio da semana atual em tempo real
+    db.ref(`cardapio/${WEEK_KEY}`).on('value', snap => {
+      CARDAPIO_FB = snap.val() || {};
+      // Re-renderiza tudo com os dados novos
+      document.getElementById('sec-hoje').innerHTML = renderCard(today, true);
+      buildWeekNav();
+      buildWeekCard();
+      renderVotacao(true);
+    });
+
+    // Votos em tempo real
+    db.ref(`votos/${WEEK_KEY}`).on('value', snap => {
       const data = snap.val() || {};
       [1,2,3,4,5].forEach(k => { votesData[k] = data[k] || 0; });
       renderVotacao(true);
     });
+
   } catch(e) {
+    console.error('Firebase error:', e);
+    // Renderiza sem Firebase
+    document.getElementById('sec-hoje').innerHTML = renderCard(today, true);
+    buildWeekNav();
+    buildWeekCard();
     renderVotacao(false);
   }
 }
@@ -288,8 +294,6 @@ function initFirebase() {
 function castVote(dayKey) {
   const prevVote = userVote;
   const newVote  = String(dayKey);
-
-  // Clicou no mesmo dia — ignora
   if (prevVote === newVote) return;
 
   userVote = newVote;
@@ -297,14 +301,8 @@ function castVote(dayKey) {
 
   if (db) {
     const updates = {};
-    // Decrementa voto anterior
-    if (prevVote) {
-      updates[`votos/${WEEK_KEY}/${prevVote}`] =
-        firebase.database.ServerValue.increment(-1);
-    }
-    // Incrementa novo voto
-    updates[`votos/${WEEK_KEY}/${newVote}`] =
-      firebase.database.ServerValue.increment(1);
+    if (prevVote) updates[`votos/${WEEK_KEY}/${prevVote}`] = firebase.database.ServerValue.increment(-1);
+    updates[`votos/${WEEK_KEY}/${newVote}`] = firebase.database.ServerValue.increment(1);
     db.ref().update(updates);
   } else {
     if (prevVote) votesData[prevVote] = Math.max(0, (votesData[prevVote] || 0) - 1);
@@ -319,22 +317,22 @@ function renderVotacao(firebaseAtivo) {
 
   const total    = Object.values(votesData).reduce((a,b) => a+b, 0);
   const hasVoted = !!userVote;
+  const VOTE_DIAS = getVoteDias();
 
   const dias = VOTE_DIAS.map(v => {
-    const votos   = votesData[v.key] || 0;
-    const pct     = total > 0 ? Math.round((votos / total) * 100) : 0;
-    const isVoted = String(v.key) === String(userVote);
-    const isFer   = !v.data;
-    const clickable = !isFer && !isVoted;
+    const votos     = votesData[v.key] || 0;
+    const pct       = total > 0 ? Math.round((votos / total) * 100) : 0;
+    const isVoted   = String(v.key) === String(userVote);
+    const clickable = !v.isFer && !isVoted;
 
     return `
-      <div class="vote-item ${isVoted ? 'voted' : ''} ${isFer ? 'feriado' : ''} ${clickable ? 'clickable' : ''}"
-           onclick="${isFer ? '' : `castVote(${v.key})`}">
+      <div class="vote-item ${isVoted ? 'voted' : ''} ${v.isFer ? 'feriado' : ''} ${clickable ? 'clickable' : ''}"
+           onclick="${v.isFer ? '' : `castVote(${v.key})`}">
         <div class="vote-item-left">
           <span class="vote-emoji">${v.emoji}</span>
           <div class="vote-info">
             <span class="vote-dia">${v.label} ${v.data ? `<small>📅 ${v.data}</small>` : ''}</span>
-            <span class="vote-prato">${v.prato || 'Feriado 🎉'}</span>
+            <span class="vote-prato">${v.prato}</span>
           </div>
         </div>
         <div class="vote-right">
@@ -344,7 +342,7 @@ function renderVotacao(firebaseAtivo) {
             </div>
             <span class="vote-pct">${pct}%</span>
           ` : `
-            <span class="vote-btn-hint">${isFer ? '🎉' : '👆 votar'}</span>
+            <span class="vote-btn-hint">${v.isFer ? '🎉' : '👆 votar'}</span>
           `}
           ${isVoted ? '<span class="vote-check">✅</span>' : ''}
         </div>
@@ -363,10 +361,19 @@ function renderVotacao(firebaseAtivo) {
         </div>
       </div>
       <div class="vote-list">${dias}</div>
-      ${!firebaseAtivo && FIREBASE_CONFIG.apiKey === 'COLE_AQUI'
-        ? '<p class="vote-demo-msg">⚙️ Configure o Firebase para votos em tempo real</p>'
-        : ''}
     </div>`;
 }
+
+// ─────────────────────────────────────────
+// INICIALIZAÇÃO
+// ─────────────────────────────────────────
+
+// Mostra estado de carregamento enquanto busca do Firebase
+document.getElementById('sec-hoje').innerHTML = `
+  <div class="weekend-msg">
+    <span class="emoji">⏳</span>
+    <h2>Carregando...</h2>
+    <p>Buscando o cardápio de hoje.</p>
+  </div>`;
 
 initFirebase();
