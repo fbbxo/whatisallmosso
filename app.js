@@ -263,10 +263,15 @@ function initFirebase() {
     firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.database();
 
-    // Carrega cardápio da semana atual em tempo real
+    // Renderiza imediatamente com o que tiver (vazio no início)
+    document.getElementById('sec-hoje').innerHTML = renderCard(today, true);
+    buildWeekNav();
+    buildWeekCard();
+    renderVotacao(false);
+
+    // Atualiza quando o Firebase responder
     db.ref(`cardapio/${WEEK_KEY}`).on('value', snap => {
       CARDAPIO_FB = snap.val() || {};
-      // Re-renderiza tudo com os dados novos
       document.getElementById('sec-hoje').innerHTML = renderCard(today, true);
       buildWeekNav();
       buildWeekCard();
@@ -366,14 +371,6 @@ function renderVotacao(firebaseAtivo) {
 // ─────────────────────────────────────────
 // INICIALIZAÇÃO
 // ─────────────────────────────────────────
-
-// Mostra estado de carregamento enquanto busca do Firebase
-document.getElementById('sec-hoje').innerHTML = `
-  <div class="weekend-msg">
-    <span class="emoji">⏳</span>
-    <h2>Carregando...</h2>
-    <p>Buscando o cardápio de hoje.</p>
-  </div>`;
 
 buildWeekNav();
 buildWeekCard();
