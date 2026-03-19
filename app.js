@@ -87,11 +87,11 @@ function fbDayToCard(dayData) {
   if (!dayData || dayData.feriado) return null;
   const items = dayData.items || {};
   return {
-    data:  dayData.data || '',
+    data: dayData.data || '',
     emoji: detectEmoji(items.proteico || ''),
     items: CAMPOS_MAP.map(c => ({
       label: c.label,
-      icon:  c.icon,
+      icon:  detectEmoji(items[c.key] || ''),  // ← era c.icon, agora é dinâmico
       name:  items[c.key] || '—',
     })),
   };
