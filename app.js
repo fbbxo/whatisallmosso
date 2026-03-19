@@ -196,10 +196,10 @@ function renderCard(dayIndex, checkFeriado = false) {
 
 function msgFeriado(nome) {
   return `<div class="weekend-msg">
-    <span class="emoji">🎉</span>
-    <h2>Feriado!</h2>
-    <p><strong>${nome}</strong><br>O RU não funciona hoje.<br>Bom feriado! 🥳</p>
-  </div>`;
+        <span class="emoji">🎉</span>
+        <h2>Feriado!</h2>
+        <p><strong>${nomeF}</strong><br>O RU não funciona hoje.<br>Bom feriado! 🥳</p>
+      </div>`;
 }
 
 // ─────────────────────────────────────────
