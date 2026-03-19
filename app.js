@@ -196,12 +196,11 @@ function renderCard(dayIndex, checkFeriado = false) {
 
 function msgFeriado(nome) {
   return `<div class="weekend-msg">
-        <span class="emoji">🎉</span>
-        <h2>Feriado!</h2>
-        <p><strong>${nomeF}</strong><br>O RU não funciona hoje.<br>Bom feriado! 🥳</p>
-      </div>`;
+    <span class="emoji">🎉</span>
+    <h2>Feriado!</h2>
+    <p><strong>${nome}</strong><br>O RU não funciona hoje.<br>Bom feriado! 🥳</p>
+  </div>`;
 }
-
 // ─────────────────────────────────────────
 // ABA SEMANA
 // ─────────────────────────────────────────
@@ -376,4 +375,6 @@ document.getElementById('sec-hoje').innerHTML = `
     <p>Buscando o cardápio de hoje.</p>
   </div>`;
 
+buildWeekNav();
+buildWeekCard();
 initFirebase();
