@@ -100,11 +100,80 @@ function fbDayToCard(dayData) {
 function detectEmoji(prato) {
   if (!prato) return '🍽️';
   const p = prato.toLowerCase();
-  if (p.includes('frango') || p.includes('galinha') || p.includes('peito')) return '🍗';
-  if (p.includes('peixe')  || p.includes('tilápia') || p.includes('atum'))  return '🐟';
-  if (p.includes('carne')  || p.includes('bife')    || p.includes('alcatra') || p.includes('lagarto')) return '🥩';
-  if (p.includes('ovo')    || p.includes('ovos'))    return '🍳';
-  if (p.includes('porco')  || p.includes('lombo')   || p.includes('costela')) return '🥓';
+
+   // Combinações (sempre primeiro!)
+  if ((p.includes('arroz') && p.includes('feijão')) ||
+      (p.includes('arroz') && p.includes('feijao'))) return '🍛';
+
+  // Frango / Aves
+  if (p.includes('frango') || p.includes('galinha') || p.includes('peito') ||
+      p.includes('coxa') || p.includes('sobrecoxa') || p.includes('ave') ||
+      p.includes('chester') || p.includes('peru')) return '🍗';
+
+  // Peixe / Frutos do mar
+  if (p.includes('peixe') || p.includes('tilápia') || p.includes('atum') ||
+      p.includes('salmão') || p.includes('bacalhau') || p.includes('sardinha') ||
+      p.includes('camarão') || p.includes('filé de peixe')) return '🐟';
+
+  // Carne bovina
+  if (p.includes('carne') || p.includes('bife') || p.includes('alcatra') ||
+      p.includes('lagarto') || p.includes('patinho') || p.includes('acém') ||
+      p.includes('costela') || p.includes('picanha') || p.includes('músculo') ||
+      p.includes('contrafilé') || p.includes('file') || p.includes('filé') ||
+      p.includes('assado') || p.includes('bovino')) return '🥩';
+
+  // Porco
+  if (p.includes('porco') || p.includes('lombo') || p.includes('linguiça') ||
+      p.includes('linguica') || p.includes('pernil') || p.includes('bacon') ||
+      p.includes('suíno') || p.includes('suino')) return '🥓';
+
+  // Ovo
+  if (p.includes('ovo') || p.includes('ovos') || p.includes('mexido') ||
+      p.includes('estrelado') || p.includes('cozido')) return '🍳';
+
+  // Macarrão / Massa
+  if (p.includes('macarrão') || p.includes('macarrao') || p.includes('massa') ||
+      p.includes('espaguete') || p.includes('lasanha') || p.includes('nhoque') ||
+      p.includes('talharim') || p.includes('fusilli') || p.includes('penne')) return '🍝';
+
+  // Arroz
+  if (p.includes('arroz')) return '🍚';
+
+  // Feijão / Leguminosas
+  if (p.includes('feijão') || p.includes('feijao') || p.includes('lentilha') ||
+      p.includes('grão') || p.includes('grao') || p.includes('ervilha')) return '🫘';
+
+  // Sopa / Caldo
+  if (p.includes('sopa') || p.includes('caldo') || p.includes('creme de') ||
+      p.includes('mingau')) return '🍲';
+
+  // Vegetariano / PTS / Tofu
+  if (p.includes('pts') || p.includes('soja') || p.includes('tofu') ||
+      p.includes('vegano') || p.includes('vegetariano') || p.includes('almôndega') ||
+      p.includes('almondega')) return '🌱';
+
+  // Batata
+  if (p.includes('batata') || p.includes('purê') || p.includes('pure')) return '🥔';
+
+  // Salada / Verdura
+  if (p.includes('salada') || p.includes('alface') || p.includes('rúcula') ||
+      p.includes('rucula') || p.includes('acelga') || p.includes('repolho') ||
+      p.includes('couve') || p.includes('espinafre')) return '🥗';
+
+  // Legumes
+  if (p.includes('cenoura') || p.includes('beterraba') || p.includes('abobrinha') ||
+      p.includes('chuchu') || p.includes('brócolis') || p.includes('brocolis') ||
+      p.includes('couve-flor') || p.includes('vagem') || p.includes('berinjela') ||
+      p.includes('tomate') || p.includes('pepino')) return '🥦';
+
+  // Hambúrguer / Lanche
+  if (p.includes('hambúrguer') || p.includes('hamburguer') ||
+      p.includes('lanche') || p.includes('sanduíche')) return '🍔';
+
+  // Pizza
+  if (p.includes('pizza')) return '🍕';
+
+  // Padrão
   return '🍽️';
 }
 
