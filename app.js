@@ -162,9 +162,9 @@ function renderCard(dayIndex, checkFeriado = false) {
       const nome = (todayData && todayData.feriadoNome) || FERIADOS_FIXOS[todayKey];
       if (nome) return msgFeriado(nome);
       return `<div class="weekend-msg">
-        <span class="emoji">📋</span>
-        <h2>Cardápio não disponível</h2>
-        <p>O cardápio desta semana ainda não foi cadastrado.<br>Verifique mais tarde! 🕐</p>
+         <span class="emoji">🎉</span>
+        <h2>Feriado!</h2>
+        <p><strong>${nomeF}</strong><br>O RU não funciona hoje.<br>Bom feriado! 🥳</p>
       </div>`;
     }
   }
