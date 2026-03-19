@@ -400,6 +400,7 @@
 
     // ─── FIREBASE INIT ────────────────────────────────────
     firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
     const auth = firebase.auth();
     const db   = firebase.database();
 
