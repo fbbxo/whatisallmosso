@@ -404,6 +404,25 @@
     const auth = firebase.auth();
     const db   = firebase.database();
 
+    // Timeout de 30 minutos
+const TIMEOUT_MS = 30 * 60 * 1000; // 30 min
+let logoutTimer;
+
+function resetTimer() {
+  clearTimeout(logoutTimer);
+  logoutTimer = setTimeout(() => {
+    auth.signOut();
+    alert('Sessão expirada por inatividade.');
+  }, TIMEOUT_MS);
+}
+
+// Reinicia o timer a cada ação do usuário
+['click', 'keydown', 'mousemove', 'touchstart'].forEach(evento => {
+  document.addEventListener(evento, resetTimer);
+});
+
+resetTimer(); // inicia o timer
+
     // ─── SEMANA ───────────────────────────────────────────
     function getWeekKey() {
       const now = new Date();
